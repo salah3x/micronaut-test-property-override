@@ -1,21 +1,37 @@
 package com.example;
 
-import io.micronaut.runtime.EmbeddedApplication;
+import io.micronaut.context.annotation.Property;
+import io.micronaut.http.client.HttpClient;
+import io.micronaut.http.client.annotation.Client;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import javax.inject.Inject;
 
-@MicronautTest
+import static io.micronaut.http.HttpRequest.GET;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@MicronautTest//(rebuildContext = true)
 public class DemoTest {
 
     @Inject
-    EmbeddedApplication application;
+    @Client("/")
+    HttpClient client;
 
     @Test
-    void testItWorks() {
-        Assertions.assertTrue(application.isRunning());
+    void test1() {
+        assertEquals(
+                "Hello World!",
+                client.toBlocking().retrieve(GET("/"))
+        );
     }
 
+    @Property(name = "greeting", value = "Bonjour")
+    @Test
+    void test2() {
+        assertEquals(
+                "Bonjour World!",
+                client.toBlocking().retrieve(GET("/"))
+        );
+    }
 }
